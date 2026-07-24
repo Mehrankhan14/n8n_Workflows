@@ -1,0 +1,341 @@
+{
+  "name": "Payment Method using Merge",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1JoXwGAopn1o4A57j6TK3leQdjghFBHdP2twmcxz6qLE",
+          "mode": "list",
+          "cachedResultName": "Payment Method using Merge ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JoXwGAopn1o4A57j6TK3leQdjghFBHdP2twmcxz6qLE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1JoXwGAopn1o4A57j6TK3leQdjghFBHdP2twmcxz6qLE/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b8de005f-0484-4bb0-9639-f6fbcb24309c",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "UaJvBMn9yFuDmSMV",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.Payment }}",
+                    "rightValue": "Card",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "3597099e-39fd-4d4b-8924-01fe735c3848"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Card"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "aca704d2-a137-4b4f-8025-53704b51ce79",
+                    "leftValue": "={{ $json.Payment }}",
+                    "rightValue": "COD",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "COD"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "28e9d9a2-960a-4b72-b00e-1686f296df2f",
+                    "leftValue": "={{ $json.Payment }}",
+                    "rightValue": "Wallet",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Wallet"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        -16
+      ],
+      "id": "ebcc0c24-60aa-4ec3-8013-2ab1ff383310",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json.Email }}",
+        "subject": "=Payment thrugh {{ $('Google Sheets Trigger').item.json.Payment }}",
+        "emailType": "text",
+        "message": "=Hi   {{ $('Google Sheets Trigger').item.json.Name }}\nYour payment will be done through {{ $('Google Sheets Trigger').item.json.Payment }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        -160
+      ],
+      "id": "5a77cfef-8866-4e8f-a15d-93e76fd86e6d",
+      "name": "Send a message",
+      "webhookId": "5050641e-15a4-4624-912f-be7b3e4c891d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I7TmqCd1xTqHLfZW",
+          "name": "DCI Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json.Email }}",
+        "subject": "=Payment through  {{ $('Google Sheets Trigger').item.json.Payment }}",
+        "emailType": "text",
+        "message": "=Hi {{ $('Google Sheets Trigger').item.json.Name }},\nYour payment will be done through {{ $('Google Sheets Trigger').item.json.Payment }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "000cf07b-3c73-4fa1-9891-9149a8f8ed1c",
+      "name": "Send a message1",
+      "webhookId": "dbe6fc08-9725-4998-88fb-348a9718f25d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I7TmqCd1xTqHLfZW",
+          "name": "DCI Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json.Email }}",
+        "subject": "=Payment through  {{ $('Google Sheets Trigger').item.json.Payment }}",
+        "emailType": "text",
+        "message": "=Hi {{ $('Google Sheets Trigger').item.json.Name }}, \nYour payment will be done through {{ $('Google Sheets Trigger').item.json.Payment }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        160
+      ],
+      "id": "db86cfb5-4caf-4bdd-8fdc-9d8e693ebdda",
+      "name": "Send a message2",
+      "webhookId": "b5685899-64a3-4e63-944e-d94ac04d4281",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I7TmqCd1xTqHLfZW",
+          "name": "DCI Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        704,
+        -16
+      ],
+      "id": "024fb73b-06de-4bd3-82fa-ea5b026cfda5",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Google Sheets Trigger').item.json.Email }}",
+        "subject": "=Order Confirmation of {{ $('Google Sheets Trigger').item.json['Order ID'] }}",
+        "emailType": "text",
+        "message": "=Hi {{ $('Google Sheets Trigger').item.json.Name }},\nYour order has been confirmed for ID {{ $('Google Sheets Trigger').item.json['Order ID'] }}\nIt will be delivered within 3 to 4 working days.\n\nThanks,",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        912,
+        -16
+      ],
+      "id": "61fb89f2-84d2-4359-ac96-d9563299f8cd",
+      "name": "Send a message3",
+      "webhookId": "4dbb32af-70bf-4d03-8866-fc81b2cc646f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I7TmqCd1xTqHLfZW",
+          "name": "DCI Gmail"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send a message3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "a7de8b89-5c86-4f94-a340-2ff153534613",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5754a6ca355425200a1a13c5b0b43c9d05f3f435f43244f97ca5e8dacb72643f"
+  },
+  "nodeGroups": [],
+  "id": "CWbNuHU7oW8ANxPg",
+  "tags": []
+}
