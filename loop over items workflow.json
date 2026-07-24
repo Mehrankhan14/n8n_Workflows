@@ -1,0 +1,233 @@
+{
+  "name": "loop over items workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fa6ead6d-d210-43aa-85c5-6fb94263ae12",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1k61HtJxOeQX0GGq6Nq0vlEMSctBcgmimJcSkdr2xG4M",
+          "mode": "list",
+          "cachedResultName": "Using loop over Item ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1k61HtJxOeQX0GGq6Nq0vlEMSctBcgmimJcSkdr2xG4M/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1k61HtJxOeQX0GGq6Nq0vlEMSctBcgmimJcSkdr2xG4M/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "9b6ff1e6-1a15-47e0-9a13-cafde1a0835a",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IjNimOyvY7Q0XzfR",
+          "name": "OAuth Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Get row(s) in sheet').item.json.Email }}",
+        "subject": "Hello Sir",
+        "emailType": "text",
+        "message": "=Dear {{ $('Get row(s) in sheet').item.json.Name }},\nMessage send successfully.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        96
+      ],
+      "id": "2a5f3f5c-c1b7-4a09-af9d-b7c4ca5b36f8",
+      "name": "Send a message",
+      "webhookId": "5ed3fc78-c5c1-4efc-ae65-803e12887645",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I7TmqCd1xTqHLfZW",
+          "name": "DCI Gmail"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "Name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "de9cb8b6-24ce-407c-aaae-6bdc39332910",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        96
+      ],
+      "id": "d2b5cc31-bff5-48ed-8f89-6b82b4f6c35f",
+      "name": "Wait Next Interation",
+      "webhookId": "f3f8555c-4a68-4600-a521-a8a698ed5f9b"
+    },
+    {
+      "parameters": {
+        "batchSize": 2,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6e335ac9-ec33-4aea-9f2c-a6da1208086c",
+      "name": "Loop Over Items (Batching)"
+    },
+    {
+      "parameters": {
+        "sendTo": "mk1490343@gmail.com",
+        "subject": "Process Complete",
+        "emailType": "text",
+        "message": "Hello Sir, all emails has send successfully.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        -96
+      ],
+      "id": "9d7868da-aff1-4c6c-9ce8-5362616acf57",
+      "name": "Final Mail to Admin",
+      "webhookId": "73566575-0531-43a5-82f8-bdeb645dbdb4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I7TmqCd1xTqHLfZW",
+          "name": "DCI Gmail"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items (Batching)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Wait Next Interation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Final Mail to Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait Next Interation": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items (Batching)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items (Batching)": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d352cd0d-d09e-41cc-b891-eeabe99256fd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5754a6ca355425200a1a13c5b0b43c9d05f3f435f43244f97ca5e8dacb72643f"
+  },
+  "nodeGroups": [],
+  "id": "E5OMLSmv3cTk8T5T",
+  "tags": []
+}
