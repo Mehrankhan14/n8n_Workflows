@@ -1,0 +1,123 @@
+{
+  "name": "Code Node",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1KMVCS_7egtq4KGOkakUSxjXwgbZ030C0a0y05mF5BPg",
+          "mode": "list",
+          "cachedResultName": "Code Node",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KMVCS_7egtq4KGOkakUSxjXwgbZ030C0a0y05mF5BPg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KMVCS_7egtq4KGOkakUSxjXwgbZ030C0a0y05mF5BPg/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a0d70f8a-ee42-4748-87d0-200e92bcdcac",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "UaJvBMn9yFuDmSMV",
+          "name": "Google Sheet"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const data = $json\n// Parsing\n\nconst cleanFUll = data.full_name.trim(/\\s+/g, ' ')\nconst parts = cleanFUll.split(\" \")\nconst first = parts[0] || \"\"\nconst last = parts[1] || \"\"\n\nlet email = data.email.trim().toLowerCase();\n\nconst rawAmount = data.amount;\nconst amountStr = String(rawAmount).trim().replace(/[^0-9.]/g, \"\");\nconst amount = parseFloat(amountStr) || 0;\nlet rawDate = data.date;\nlet msg = data.message.trim().replace(/\\s+/g, ' ')\n\n// Transform \n\nfunction cap(s){\n  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();\n}\n\nconst firstName = cap(first)\nconst lastName = cap(last)\n\nconst d = new Date(rawDate);\nconst niceDate = d.toDateString();\n\nconst subject = `Qoute Request from ${firstName} - Amount ${amount}`;\n\nconst cleanMsg = msg.charAt(0).toUpperCase() + msg.slice(1);\n\nreturn {\n  firstName,\n  lastName,\n  email,\n  amount,\n  niceDate,\n  subject,\n  cleanMsg,\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "578fa00c-bb01-402e-a55a-9df581321bee",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "=Hi  {{ $json.firstName }},\nThanks for you request.\nAmount: {{ $json.amount }}\nDate: {{ $json.niceDate }}\nMessage: {{ $json.cleanMsg }} \nRegards Khan",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "3b9dccd2-f32c-4138-8e78-186824c6536c",
+      "name": "Send a message",
+      "webhookId": "0e76e668-67a4-4b6d-84ce-a660e21e7c6a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "I7TmqCd1xTqHLfZW",
+          "name": "DCI Gmail"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "7a9f7cd0-6bc0-4745-944c-18ccce9f7757",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "5754a6ca355425200a1a13c5b0b43c9d05f3f435f43244f97ca5e8dacb72643f"
+  },
+  "nodeGroups": [],
+  "id": "IS5qhHH6m14EYWN8",
+  "tags": []
+}
