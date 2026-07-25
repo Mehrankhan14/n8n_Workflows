@@ -1,0 +1,146 @@
+{
+  "name": "Webhook & Gemini Project",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bc0fe1c5-59f3-4ae1-9f64-e2abf8a91fe6",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "769eb947-7647-4578-8be3-699efac60918",
+      "name": "Webhook",
+      "webhookId": "bc0fe1c5-59f3-4ae1-9f64-e2abf8a91fe6"
+    },
+    {
+      "parameters": {
+        "sendTo": "ck9829938@gmail.com",
+        "subject": "AI Summary",
+        "emailType": "text",
+        "message": "={{ $json.content.parts[0].text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "3db2f259-c2e7-4943-944a-920b2adba265",
+      "name": "Send a message",
+      "webhookId": "b478c32f-7153-405d-b098-b5b13ddd6bde",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wmoSsemBewYXE7Kt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Respond send  please check your email.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        768,
+        0
+      ],
+      "id": "17a7d8e4-a7e9-4869-82a2-b8f8424281c5",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.5-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.5-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.body.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d3110754-1eb7-40e3-bf18-7045f8e6fba6",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ks5PSIMahjB4sCx5",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "015e30f6-d84f-48ac-a9bb-9215eddb20f6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1aabac5b93edaf15b01bdd63ef4a439e08101d91000f8d39a45ffab8375f56fb"
+  },
+  "nodeGroups": [],
+  "id": "EvuhSGBMM9AuvkWH",
+  "tags": []
+}
