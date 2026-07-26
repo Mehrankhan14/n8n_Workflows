@@ -1,0 +1,172 @@
+{
+  "name": "Cold Email Writer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "c6c62bcc-fc28-4411-a708-ecab85c09a68",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ce226851-38af-4934-a371-31f0670f4609",
+      "name": "Webhook",
+      "webhookId": "c6c62bcc-fc28-4411-a708-ecab85c09a68"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-3.1-flash-lite",
+          "mode": "list",
+          "cachedResultName": "models/gemini-3.1-flash-lite"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Write a high-conversion, professional cold email for the client named {{ $json.body.clientName }} offering the service of {{ $json.body.service }}. MY INFORMATION: My name is Mehran Khan and my company is Khan's Services. STRICT RULES: You must start the response directly with 'Subject:'. Do not use any brackets like [Your Name], [Your Company], or [Insert Phone]. Replace all such placeholders with the information I provided. If some information is missing, simply omit that part instead of using a bracket. Do not include any introductory phrases like 'Sure' or 'Here is your draft'. Only provide the final email content in English.\n"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "3de0b002-0729-42f6-8a7a-38f3e6ad18c3",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "ks5PSIMahjB4sCx5",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawText = $input.first().json.content.parts[0].text;\n\nconst subjectMatch = rawText.match(/^Subject:\\s*(.*)$/m);\nconst subject = subjectMatch ? subjectMatch[1].trim() : \"\";\n\nlet body = rawText.replace(/^Subject:.*\\n?/, \"\").trim();\n\n// Convert literal \\n into real line breaks\nbody = body.replace(/\\\\n/g, \"\\n\");\n\n// Remove extra blank lines\nbody = body.replace(/\\n{3,}/g, \"\\n\\n\");\n\nreturn [\n  {\n    json: {\n      subject,\n      body,\n    },\n  },\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "id": "eda4d06b-3cb6-4ff2-ad88-65bace4d8217",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Webhook').item.json.body.clientEmail }}",
+        "subject": "={{ $json.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "f12fdca1-ccea-4920-92df-b114efaded33",
+      "name": "Send a message",
+      "webhookId": "b9bca0a1-1a14-40ca-b647-d42b5b307e92",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "wmoSsemBewYXE7Kt",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "Email send successfully",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        976,
+        0
+      ],
+      "id": "0ca15c79-bb89-45e1-8a28-317e34f96f80",
+      "name": "Respond to Webhook"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "b5f9d78e-d1a0-4b52-9ee5-5231ac404735",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1aabac5b93edaf15b01bdd63ef4a439e08101d91000f8d39a45ffab8375f56fb"
+  },
+  "nodeGroups": [],
+  "id": "9T6tUDUfnGIWQY89",
+  "tags": []
+}
