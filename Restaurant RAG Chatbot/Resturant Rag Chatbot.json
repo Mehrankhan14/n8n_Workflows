@@ -1,0 +1,305 @@
+{
+  "name": "Resturant Rag Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -352,
+        -16
+      ],
+      "id": "2c802fc2-a3b3-4eb4-80d0-3b23207d944d",
+      "name": "When chat message received",
+      "webhookId": "66d93454-32cc-4b52-9bd4-70fae271b71c"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a helpful assistant\n\n- use the tool \"Reciepe retrival\" for retival information related to restaurant reciepe."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        0,
+        -16
+      ],
+      "id": "f95ae6b4-3e98-4569-8218-0c14b117ef48",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-5-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-5-mini"
+        },
+        "responsesApiEnabled": false,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        192
+      ],
+      "id": "8ad5590c-8dc9-45f3-8cf3-c02ade235d85",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "ADvTzcI5QaPmHhPP",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        112,
+        208
+      ],
+      "id": "f324e92f-72bd-4536-a6b8-098204137aed",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "formTitle": "RAG ChatBot",
+        "formDescription": "Upload a resturent pdf for RAG chatbot.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "File",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -400,
+        368
+      ],
+      "id": "392ca587-ee94-4a8b-9ae4-ac2cd0a8b56f",
+      "name": "On form submission",
+      "webhookId": "f65bdfaa-3f3d-4087-8397-eae053593952"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag-resturant-agent",
+          "mode": "list",
+          "cachedResultName": "rag-resturant-agent"
+        },
+        "embeddingBatchSize": 100,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -128,
+        384
+      ],
+      "id": "32bf15ce-9c6a-4b4f-818d-c7e5b3411106",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "nZzyAgFuJjHIYbYb",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        592
+      ],
+      "id": "81e82a4a-b856-4fbd-8e08-c0af9890fb24",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "ADvTzcI5QaPmHhPP",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        176,
+        544
+      ],
+      "id": "f032c581-7def-4008-b2e0-7a6fa0093d17",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        304
+      ],
+      "id": "4cfff5e9-185c-47dc-a5c5-90932c49f900",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "ADvTzcI5QaPmHhPP",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "retrive information from uploaded restaurant pdf to user chatbot.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag-resturant-agent",
+          "mode": "list",
+          "cachedResultName": "rag-resturant-agent"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        288,
+        128
+      ],
+      "id": "7144536b-5865-414a-ae76-f5c8a2247215",
+      "name": "Reciepe retrival",
+      "credentials": {
+        "pineconeApi": {
+          "id": "nZzyAgFuJjHIYbYb",
+          "name": "Pinecone account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Reciepe retrival",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reciepe retrival": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a878f8af-adc3-4fb6-afaa-1d7715394f6b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9c2cd39fbc96e07f32300ad31d9884e82a10a2425b139c99448dac8bf14e7f2d"
+  },
+  "nodeGroups": [],
+  "id": "utcE1IDwqSDlcBsY",
+  "tags": []
+}
