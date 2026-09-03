@@ -1,0 +1,427 @@
+{
+  "name": "Invoice Parser",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Invoice Parse",
+        "formDescription": "Upload invoice to parse information into CRM",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Invoice",
+              "fieldType": "file"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2bf6bc15-3a07-48ab-8bd0-3b134f45779a",
+      "name": "On form submission",
+      "webhookId": "8824a26b-dcbc-449b-8019-4b45933f819d"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "Invoice",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "d15f1bdd-9bbf-43e0-b558-d2bed310086c",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.text }}",
+        "attributes": {
+          "attributes": [
+            {
+              "name": "Invoice Number",
+              "description": "Actual Invoice number",
+              "required": true
+            },
+            {
+              "name": "Sender Name",
+              "description": "Name of invoice sender",
+              "required": true
+            },
+            {
+              "name": "Sender Phone",
+              "description": "Email of invoice sender",
+              "required": true
+            },
+            {
+              "name": "Sender Address",
+              "description": "Actual address of invoice sender",
+              "required": true
+            },
+            {
+              "name": "Total Amount",
+              "description": "total amount",
+              "required": true
+            },
+            {
+              "name": "Invoice Date",
+              "type": "date",
+              "description": "Issue date of invoice",
+              "required": true
+            },
+            {
+              "name": "Due Date",
+              "type": "date",
+              "description": "due date of invoice",
+              "required": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        448,
+        0
+      ],
+      "id": "9f371426-5b54-406a-b6d6-01a6f35681ab",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        384,
+        208
+      ],
+      "id": "2605c707-fcb6-4272-b0cc-51ccbaaae3ad",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yGUC0DWZmO8Qkrn-dDsEPMBKwMArEUTHaHb2g-3OiNk",
+          "mode": "list",
+          "cachedResultName": "Invoice Parser",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yGUC0DWZmO8Qkrn-dDsEPMBKwMArEUTHaHb2g-3OiNk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yGUC0DWZmO8Qkrn-dDsEPMBKwMArEUTHaHb2g-3OiNk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Invoice Number": "={{ $json.output['Invoice Number'] }}",
+            "Sender Name": "={{ $json.output['Sender Name'] }}",
+            "Sender Phone": "={{ $json.output['Sender Phone'] }}",
+            "Sender Address": "={{ $json.output['Sender Address'] }}",
+            "Total Amount": "={{ $json.output['Total Amount'] }}",
+            "Invoice Date": "={{ $json.output['Invoice Date'] }}",
+            "Due Date": "={{ $json.output['Due Date'] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender Name",
+              "displayName": "Sender Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender Phone",
+              "displayName": "Sender Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Sender Address",
+              "displayName": "Sender Address",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Total Amount",
+              "displayName": "Total Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        816,
+        0
+      ],
+      "id": "75dcef86-d36f-421d-9fe3-651bae012907",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "IuQ7Kh66zysbni6C",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Generate a professional, concise, and ready-to-send email to the CEO using the invoice information provided below.\n\nInvoice Information:\n\nInvoice Number: {{ $json['Invoice Number'] }}\nSender Name: {{ $json['Sender Name'] }}\nSender Phone: {{ $json['Sender Phone'] }}\nSender Address: {{ $json['Sender Address'] }}\nTotal Amount: {{ $json['Total Amount'] }}\nInvoice Date: {{ $json['Invoice Date'] }}\nDue Date: {{ $json['Due Date'] }}\n\nRecipient:\nCEO Name: Khan\n\nEmail signature:\nBest regards,\nAli\nAutomation Expert\n12345\n\nInstructions:\n1. Generate a suitable professional subject for the email.\n2. Generate only the actual email body in the body field.\n3. The email must be completely ready to send.\n4. Address the CEO as \"Dear Khan,\".\n5. Clearly mention the important invoice information.\n6. Keep the email professional, natural, and easy to understand.\n7. Do not invent or add any invoice information that is not provided.\n8. Do not use markdown formatting.\n9. Do not use asterisks (*) anywhere.\n10. Do not use backslash characters (\\) anywhere in the email content.\n11. Do not include placeholders, variables, expressions, or template syntax in the generated email.\n12. Do not include explanations outside the email.\n13. End the email with:\nBest regards,\nAli\nAutomation Expert\n12345\n14. Return exactly two fields: subject and body.",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "093b84c2-458f-4932-9e20-7b95f076998e",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        208
+      ],
+      "id": "9456f797-0ab5-499a-b9bc-f38c15a87d9d",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ck9829938@gmail.com",
+        "subject": "={{ $json.output.subject }}",
+        "emailType": "text",
+        "message": "={{ $json.output.body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1408,
+        0
+      ],
+      "id": "e04a4072-6ef7-45bc-87c3-2fe6b9926345",
+      "name": "Send a message",
+      "webhookId": "6744abb9-5335-4f88-878c-ddc0a66b5264",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gsTdfoxk2GlP1FkU",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"subject\": {\n      \"type\": \"string\",\n      \"description\": \"The professional email subject.\"\n    },\n    \"body\": {\n      \"type\": \"string\",\n      \"description\": \"The complete professional email body, ready to send.\"\n    }\n  },\n  \"required\": [\n    \"subject\",\n    \"body\"\n  ],\n  \"additionalProperties\": false\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1184,
+        208
+      ],
+      "id": "9f8e0c00-7356-4b1b-bd7b-6f0b0021591e",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "f98bc378-8e02-46bb-adf7-11f8e4396e7d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "8fe967200e8b56aae49232b61608b2906f351460cd80f1b56666708c55737a99"
+  },
+  "nodeGroups": [],
+  "id": "9sn76W8q3ukrpH1I",
+  "tags": []
+}
