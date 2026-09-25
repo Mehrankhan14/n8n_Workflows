@@ -1,0 +1,249 @@
+{
+  "name": "Resume Screaning by AI",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "talent-cv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "aed8ebef-1dd3-4163-8d9b-07f0dca932ef",
+      "name": "Webhook",
+      "webhookId": "3385ab25-0cc4-46f4-8ec3-284850ac9453"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        224,
+        0
+      ],
+      "id": "52edd104-b6c2-4b2e-b147-5ddc59f570a6",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=You are an expert Technical Recruiter and AI Data Parser. Your task is to analyze the provided Resume Text against a specific Job Description (JD) and return a structured analysis.\n\n### JOB DESCRIPTION:\nTitle: Senior Full-Stack Engineer (AI & Cloud Platforms)\nRequirements: 2+ years exp, Next.js (App Router), NestJS, Supabase, PostgreSQL,AI Automation, prompt engineer, agentic ai, Git/GitHub.\nPlus Points: Docker, Kubernetes, Terraform, AWS/GCP/Azure, DevSecOps.\n\n### EVALUATION LOGIC:\n1. Core Match (60%): Focus on Next.js, NestJS, and Supabase, Freelancing, Python.\n2. Experience (20%): Must be 1+ years for full marks.\n3. Plus Points (20%): Additional points for Cloud and DevOps tools.\n4. Strictness: If the candidate only knows WordPress/HTML/CSS, the score must be below 50.\n\n### INPUT DATA:\nResume Text: {{ $json.text }}\n\n### RESPONSE FORMAT:\nYou must return ONLY a valid JSON object. Do not include any conversational text or markdown blocks like ```json.\n{\n  \"candidate_name\": \"Extract Name\",\n  \"total_experience_years\": \"Number only\",\n  \"tech_stack\": [\"Skill 1\", \"Skill 2\"],\n  \"match_score\": \"Number between 0-100\",\n  \"analysis_summary\": \"Short 1-sentence reason for this score\"\n}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "textFormat": {
+            "textOptions": {
+              "type": "json_object"
+            }
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        0
+      ],
+      "id": "5510cc00-c0d8-481c-aa75-51d30a52d436",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "tableId": "resumes",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "name",
+              "fieldValue": "={{ $json.output[0].content[0].text.candidate_name }}"
+            },
+            {
+              "fieldId": "total-experience",
+              "fieldValue": "={{ $json.output[0].content[0].text.total_experience_years }}"
+            },
+            {
+              "fieldId": "tech_stack",
+              "fieldValue": "={{ $json.output[0].content[0].text.tech_stack }}"
+            },
+            {
+              "fieldId": "match_score",
+              "fieldValue": "={{ $json.output[0].content[0].text.match_score }}"
+            },
+            {
+              "fieldId": "summary",
+              "fieldValue": "={{ $json.output[0].content[0].text.analysis_summary }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        816,
+        0
+      ],
+      "id": "b550df4c-97cc-4806-a7fb-abee333dd7ea",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "gVUogoLAf9CEtnFy",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "1bcbaed6-6d31-4e5a-abfe-52cce7b2ec8a",
+              "leftValue": "={{ $json.match_score }}",
+              "rightValue": 60,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "a28eafb0-ae2d-4b8a-8e54-aaeded24f3e5",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "ck9829938@gmail.com",
+        "subject": "=High-Match Candidate Alert: {{ $json.name }} for Senior Full-Stack Role ",
+        "message": "=Dear Hiring Team, \nOur AI screening engine has just identified a high-potential candidate for the Senior Full-Stack Engineer position. Candidate Overview:   \nName: {{ $json.name }}   \nExperience: {{ $json['total-experience'] }} Years   \nMatch Score: {{ $json.match_score }}%   \nCore Tech Stack: {{ $json.tech_stack.join(', ') }}   \nAI Analysis Summary: {{ $json.summary }}   \nThe candidate's profile has been successfully synced to our Supabase talent database. Please review the full credentials and schedule an initial screening if applicable.  \nBest Regards,  \nTalentAI Automation System Powered by The Khan",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        -96
+      ],
+      "id": "d0659cbc-f0c2-4d2e-b59e-937f41d1e97c",
+      "name": "Send a message",
+      "webhookId": "8c5bc3c4-c5de-4f7c-bcf1-6e08a9983dc1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TsRRMLt5j0VignlW",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6f27b644-e5eb-4679-a99e-445503a52a56",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0207ab8c082bb15f4eb32c5d4bf0b65c1c056749ba831c21c4ccd83b25e3661f"
+  },
+  "nodeGroups": [],
+  "id": "kFIqA6OLRORfpe1Q",
+  "tags": []
+}
