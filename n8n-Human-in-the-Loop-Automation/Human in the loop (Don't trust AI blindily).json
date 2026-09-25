@@ -1,0 +1,244 @@
+{
+  "name": "Human in the loop (Don't trust AI blindily)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "drafts",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ff02384d-21d2-4fce-a2e3-9e14d2f6bd42",
+      "name": "Webhook",
+      "webhookId": "da2edef9-a54b-43ae-8ba5-052b89efa5d8"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=Write a professional email based on the following details:\n\n- Topic/Context: {{ $json.body.topic }}\n- Sender: Khan.\n- Recipient's Name: {{ $json.body.recipient_name }}\n- Current Date: {{ $now.format('MMMM DD, YYYY') }}\n- Location Context: The Khan HQ / Online.\n\nConstraints:\n1. Strictly NO placeholders like [Date] or [Recipient Name].\n2. Use the Topic provided above to generate the content.\n3. Summarize the key benefits in 2-3 short sentences.\n4. Finish with a clear call to action.\n5. If no specific time is in the topic, assume 10:00 AM PKT."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "34502f0e-8db8-4d8c-9b6a-b52dc112b0d2",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resume": "form",
+        "formTitle": "Request for Competition",
+        "formDescription": "=Reveiwe this message:  {{ $json.output[0].content[0].text }}",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "={{ $('Webhook').item.json.body.topic }}",
+              "fieldType": "radio",
+              "defaultValue": "Approve",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Approve"
+                  },
+                  {
+                    "option": "Reject"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        0
+      ],
+      "id": "3202bff1-1693-4f59-984c-06fff27797a0",
+      "name": "Wait",
+      "webhookId": "2ae5592e-390f-4f26-9163-3e4bb87054ed"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "bb05ba86-fc6d-463d-bc9f-9c2854c0cbd9",
+              "leftValue": "={{ $json['Quiz Competition 2026 '] }}",
+              "rightValue": "Approve",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        816,
+        0
+      ],
+      "id": "7e4e8df2-fe4a-4146-a07d-f661542ffe25",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "ck9829938@gmail.com",
+        "subject": "Meeting Approved",
+        "emailType": "text",
+        "message": "Your meeting is approved!",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        -144
+      ],
+      "id": "86702554-6600-42ac-a269-d3a7fe037160",
+      "name": "Approve",
+      "webhookId": "11fd0e43-468d-4a99-aee8-277068375d2f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TsRRMLt5j0VignlW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "ck9829938@gmail.com",
+        "subject": "Request Reject",
+        "emailType": "text",
+        "message": "Your request is rejected.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1024,
+        112
+      ],
+      "id": "8d0615ad-cbe8-4988-88ce-70c0cc36ae43",
+      "name": "Reject",
+      "webhookId": "7498b4b7-8031-407b-a708-e70900a92579",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TsRRMLt5j0VignlW",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Approve",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Reject",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "5cbc51af-7a77-4ab3-9abf-0314aeccc4d5",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0207ab8c082bb15f4eb32c5d4bf0b65c1c056749ba831c21c4ccd83b25e3661f"
+  },
+  "nodeGroups": [],
+  "id": "G7bvkSpbqbBaA8bZ",
+  "tags": []
+}
