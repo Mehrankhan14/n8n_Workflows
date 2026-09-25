@@ -1,0 +1,380 @@
+{
+  "name": "Genral Store(RAG) through Email",
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Search the General Store knowledge base for information about products, pricing, stock, policies, hours and FAQs. Always use this before answering a customer question.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "general-store-gmail-cs",
+          "mode": "list",
+          "cachedResultName": "general-store-gmail-cs"
+        },
+        "topK": 5,
+        "options": {
+          "pineconeNamespace": "general-store"
+        }
+      },
+      "id": "8746abc2-6f13-43e7-8dd8-81fe2c8abbf6",
+      "name": "store_knowledge_base",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        544,
+        160
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "YVtjOBDYpNMhrcGP",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "c65eb3b7-e08d-459f-9c62-f12d31df7878",
+      "name": "OpenAI Embeddings",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        400,
+        320
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "Gateway credits",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "General Store Knowledge Upload",
+        "formDescription": "Upload product info, FAQs, policies or any documents to add to the store knowledge base.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Documents",
+              "fieldType": "file",
+              "acceptFileTypes": ".pdf,.txt,.csv,.docx,.json",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "buttonLabel": "Upload",
+          "path": "store-knowledge-upload"
+        }
+      },
+      "id": "4b1af200-74e0-4fce-a15d-30c7a334d0e0",
+      "name": "Upload Store Documents",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.6,
+      "position": [
+        -96,
+        512
+      ],
+      "webhookId": "e39921d5-0a79-4488-805a-afa67d5a6f44"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "general-store-gmail-cs",
+          "mode": "list",
+          "cachedResultName": "general-store-gmail-cs"
+        },
+        "options": {
+          "pineconeNamespace": "general-store"
+        }
+      },
+      "id": "2aad9bb4-fee5-40c5-9881-7e058405add1",
+      "name": "Store in Pinecone",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        320,
+        512
+      ],
+      "credentials": {
+        "pineconeApi": {
+          "id": "YVtjOBDYpNMhrcGP",
+          "name": "Pinecone account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "id": "ca52cd0a-9381-44ec-8106-11eade70f109",
+      "name": "Load Uploaded Files",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        512,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "id": "58122904-60c9-4419-afbc-ece429203cc3",
+      "name": "Split Text",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        320,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "8b015126-a1f4-422e-8541-af09e4d2bf9a",
+      "name": "OpenAI Embeddings1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        80,
+        736
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "Gateway credits",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "maxResults": 5,
+        "filters": {
+          "labelIds": [
+            "Label_945687463865664993"
+          ],
+          "readStatus": "both"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        80,
+        -64
+      ],
+      "id": "1ae11471-837d-4748-a98a-7fa9f37d0843",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TsRRMLt5j0VignlW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "You are a helpful customer support assistant for Oakwood General Store.\n\nYour replies must feel natural, human-written, friendly, and professional.\n\nImportant reply rules:\n- Never use asterisks (*) in your replies.\n- Do not use AI-style formatting such as bullet points, excessive headings, or unnecessary structured formatting.\n- Do not use semicolons (;).\n- Avoid robotic, overly formal, or AI-generated sounding language.\n- Write in simple, natural, conversational English.\n- Keep the response clear and helpful.\n- Answer only what the customer asks.\n- Do not mention that you are an AI, AI agent, chatbot, language model, or automated system.\n- Do not add unnecessary explanations or information.\n- Do not make up information. If the required information is not available, politely tell the customer that you do not have that information.\n- Make the response sound like it was written personally by a staff member of Oakwood General Store.\n- Always maintain a polite and professional tone.\n- At the end of every customer reply, add:\n\nBest regards,\nOakwood General Store\n\nDo not add any other signature, disclaimer, or AI-generated wording."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        352,
+        -64
+      ],
+      "id": "34d2a8b6-8149-4d2e-be2b-afb63bcb13ed",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        752,
+        -64
+      ],
+      "id": "61152b49-ba82-4439-b4db-246649cc5db7",
+      "name": "Reply to a message",
+      "webhookId": "cc227652-6828-4c38-8211-765e7c91e1ae",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TsRRMLt5j0VignlW",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        240,
+        144
+      ],
+      "id": "f38e13bd-86c3-4214-8281-f826c8cb0fbf",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "store_knowledge_base": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Embeddings": {
+      "ai_embedding": [
+        [
+          {
+            "node": "store_knowledge_base",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Store Documents": {
+      "main": [
+        [
+          {
+            "node": "Store in Pinecone",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Uploaded Files": {
+      "ai_document": [
+        [
+          {
+            "node": "Store in Pinecone",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Text": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Load Uploaded Files",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Embeddings1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Store in Pinecone",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fb928b3d-732f-4089-9096-bd0160141916",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0207ab8c082bb15f4eb32c5d4bf0b65c1c056749ba831c21c4ccd83b25e3661f"
+  },
+  "nodeGroups": [],
+  "id": "pVLmH11Ai6orRGZJ",
+  "tags": []
+}
