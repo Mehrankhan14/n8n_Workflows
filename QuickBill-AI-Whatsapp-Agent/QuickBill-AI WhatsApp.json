@@ -1,0 +1,118 @@
+{
+  "name": "QuickBill-AI WhatsApp",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Whats-Ai",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "03b9668b-6fa6-4a45-915a-168c55cd57f5",
+      "name": "Webhook",
+      "webhookId": "90c49ad5-709b-4ccc-8633-e2436c077095"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "responses": {
+          "values": [
+            {
+              "role": "system",
+              "content": "=You are a professional billing assitant. write a short, friendly, and energetic WhatsApp thank you message for a client.\n\nClient Name: {{ $json.body.clientName }}\nAmount Paid: ${{ $json.body.amount }}\nService Bought: {{ $json.body.service }}\n\nKeep the message under 3-4 sentences. Include a professional tone, use 1-2 emojis, and do not include subject lines. Just give me final message body. "
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        224,
+        0
+      ],
+      "id": "54d6d5e7-31a9-47b3-87e9-fddc2d1b8b82",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1336505162886160",
+        "recipientPhoneNumber": "={{ $('Webhook').item.json.body.whatsapp }}",
+        "textBody": "={{ $json.output[0].content[0].text }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        592,
+        0
+      ],
+      "id": "909b4948-f16a-4af2-b40e-1673aa9765da",
+      "name": "Send message",
+      "webhookId": "ee462b14-eac1-452b-bd42-68645b5ba920",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "hWqWVKcqvpS1vcBR",
+          "name": "WhatsApp account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3f05d9bf-84e8-47b8-a06c-e41a7b4c680b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "1ad8118aa8957e96d501c7bfe727823422fcd52492a83e0179a9103ccc1c819f"
+  },
+  "nodeGroups": [],
+  "id": "jmzTrhxSw2UhUv51",
+  "tags": []
+}

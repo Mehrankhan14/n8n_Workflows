@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instant Receipt Generator</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans min-h-screen flex flex-col justify-between">
+
+    <!-- Top Navbar -->
+    <header class="bg-white border-b border-gray-200 py-4 px-6 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-2 font-bold text-lg text-indigo-600 tracking-tight">
+                <i class="fa-solid fa-file-invoice-dollar text-xl"></i> QuickBill Studio
+            </div>
+            <span class="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full flex items-center gap-1.5">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> n8n Live Sync
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-5xl mx-auto px-4 py-10 w-full grid md:grid-cols-12 gap-8 my-auto">
+        
+        <!-- Left Side: Interactive Billing Form -->
+        <div class="md:col-span-7 bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+            <div class="mb-6">
+                <h1 class="text-xl font-bold text-gray-900">Create New Receipt</h1>
+                <p class="text-sm text-gray-500 mt-0.5">Fill in the client's payment details below to send an automated WhatsApp receipt.</p>
+            </div>
+
+            <!-- Success Message Box -->
+            <div id="successBox" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-xl mb-6 text-sm flex items-start gap-3">
+                <i class="fa-solid fa-circle-check text-lg text-emerald-500 mt-0.5"></i>
+                <div>
+                    <strong class="font-semibold block">Receipt Dispatched!</strong>
+                    The payment notification has been successfully pushed via n8n to WhatsApp.
+                </div>
+            </div>
+
+            <form id="receiptForm" class="space-y-4">
+                <!-- Customer Name -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Customer Name</label>
+                    <div class="relative">
+                        <i class="fa-solid fa-user absolute left-4 top-3.5 text-gray-400 text-sm"></i>
+                        <input type="text" id="clientName" required placeholder="Alex Mercer" 
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                    </div>
+                </div>
+
+                <!-- WhatsApp Number -->
+                <div>
+                    <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">WhatsApp Number (With Country Code)</label>
+                    <div class="relative">
+                        <i class="fa-brands fa-whatsapp absolute left-4 top-3.5 text-emerald-500 text-base"></i>
+                        <input type="tel" id="whatsapp" required placeholder="e.g. 923102843036" 
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-11 pr-4 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                    </div>
+                </div>
+
+                <!-- Service and Amount in Grid -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Service / Product</label>
+                        <select id="service" class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 px-4 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                            <option value="Website Development">Web Development</option>
+                            <option value="Monthly Gym Membership">Gym Membership</option>
+                            <option value="Social Media Marketing">SMM Services</option>
+                            <option value="Consultation Fee">Consultation Fee</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-600 uppercase tracking-wider mb-1.5">Amount Paid ($)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-3 text-sm font-semibold text-gray-500">$</span>
+                            <input type="number" id="amount" required placeholder="150" 
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl py-2.5 pl-8 pr-4 text-sm focus:outline-none focus:border-indigo-500 focus:bg-white transition-all">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" 
+                    class="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm py-3.5 rounded-xl transition-all shadow-md shadow-indigo-600/10 flex items-center justify-center gap-2 cursor-pointer">
+                    <span id="btnText">Generate & Send Receipt</span>
+                    <i class="fa-solid fa-paper-plane text-xs" id="btnIcon"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Right Side: Live Receipt Preview Box -->
+        <div class="md:col-span-5 flex flex-col justify-center">
+            <div class="bg-gray-900 text-white rounded-2xl p-6 shadow-xl border border-gray-800 relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-32 h-32 bg-indigo-500/10 rounded-full filter blur-xl"></div>
+                
+                <div class="flex justify-between items-start border-b border-gray-800 pb-4 mb-4">
+                    <div>
+                        <p class="text-[10px] uppercase tracking-widest text-indigo-400 font-bold">Receipt Preview</p>
+                        <h3 class="text-base font-bold mt-1">Transaction Success</h3>
+                    </div>
+                    <i class="fa-solid fa-receipt text-2xl text-gray-700"></i>
+                </div>
+
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between"><span class="text-gray-400">Issued To:</span> <span id="prevName" class="font-medium text-gray-200">---</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">WhatsApp:</span> <span id="prevPhone" class="font-medium text-gray-200">---</span></div>
+                    <div class="flex justify-between"><span class="text-gray-400">Description:</span> <span id="prevService" class="font-medium text-gray-200">Web Development</span></div>
+                    <div class="border-t border-gray-800 my-2 pt-2 flex justify-between items-center">
+                        <span class="text-gray-400 font-semibold">Total Paid:</span>
+                        <span class="text-xl font-bold text-emerald-400">$<span id="prevAmount">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 text-xs text-gray-400 border-t border-gray-200 bg-white">
+        &copy; 2026 QuickBill Studio. Powered by n8n Core Engine.
+    </footer>
+
+    <!-- JS Form Script Logic -->
+    <script>
+        const form = document.getElementById('receiptForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const successBox = document.getElementById('successBox');
+
+        // Live Preview Logic
+        document.getElementById('clientName').addEventListener('input', (e) => document.getElementById('prevName').innerText = e.target.value || '---');
+        document.getElementById('whatsapp').addEventListener('input', (e) => document.getElementById('prevPhone').innerText = e.target.value || '---');
+        document.getElementById('service').addEventListener('change', (e) => document.getElementById('prevService').innerText = e.target.value);
+        document.getElementById('amount').addEventListener('input', (e) => document.getElementById('prevAmount').innerText = e.target.value || '0');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Loading state
+            submitBtn.disabled = true;
+            btnText.innerText = "Syncing with n8n...";
+            btnIcon.className = "fa-solid fa-spinner animate-spin text-xs";
+
+            const payload = {
+                clientName: document.getElementById('clientName').value,
+                whatsapp: document.getElementById('whatsapp').value,
+                service: document.getElementById('service').value,
+                amount: document.getElementById('amount').value,
+                receiptId: 'INV-' + Math.floor(100000 + Math.random() * 900000)
+            };
+
+            const N8N_WEBHOOK_URL = 'https://gelise.app.n8n.cloud/webhook-test/Whats-Ai';
+
+            try {
+                const response = await fetch(N8N_WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    successBox.classList.remove('hidden');
+                    form.reset();
+                    setTimeout(() => successBox.classList.add('hidden'), 6000);
+                } else {
+                    alert('Error: n8n workflow rejected the data.');
+                }
+            } catch (error) {
+                alert('Connection Failed! Please verify your n8n URL.');
+            } finally {
+                submitBtn.disabled = false;
+                btnText.innerText = "Generate & Send Receipt";
+                btnIcon.className = "fa-solid fa-paper-plane text-xs";
+            }
+        });
+    </script>
+</body>
+</html>
